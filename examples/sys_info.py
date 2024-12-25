@@ -58,21 +58,22 @@ def bytes2human(n):
 def cpu_usage():
     # load average, uptime
     uptime = datetime.now() - datetime.fromtimestamp(psutil.boot_time())
-    av1, av2, av3 = os.getloadavg()
-    return "Ld:%.1f %.1f %.1f Up: %s" \
-        % (av1, av2, av3, str(uptime).split('.')[0])
+    #av1, av2, av3 = os.getloadavg()
+    use_percent = psutil.cpu_percent(interval=None)
+    return "Cpu: %.2f  Up: %s" \
+        % (use_percent, str(uptime).split('.')[0])
 
 
 def mem_usage():
     usage = psutil.virtual_memory()
-    return "Mem: %s %.0f%%" \
-        % (bytes2human(usage.used), 100 - usage.percent)
+    return "Mem: %.0f%%, free %.2f GB" \
+        % (usage.percent, usage.free/1024/1024/1024)
 
 
 def disk_usage(dir):
     usage = psutil.disk_usage(dir)
-    return "SD:  %s %.0f%%" \
-        % (bytes2human(usage.used), usage.percent)
+    return "Disk: %.0f%%, free %.2f GB" \
+        % (usage.percent, usage.free/1024/1024/1024)
 
 
 def network(iface):
@@ -80,6 +81,11 @@ def network(iface):
     return "%s: Tx%s, Rx%s" % \
            (iface, bytes2human(stat.bytes_sent), bytes2human(stat.bytes_recv))
 
+def temperature():
+    cpu_temp = psutil.sensors_temperatures()["cpu_thermal"][0]
+    disk_temp = psutil.sensors_temperatures()["nvme"][0]
+    return "Cpu: %.1f°C, Disk: %.1f°C " \
+           % (cpu_temp.current, disk_temp.current)
 
 def stats(device):
     # use custom font
@@ -95,6 +101,7 @@ def stats(device):
             draw.text((0, 26), disk_usage('/'), font=font2, fill="white")
             try:
                 draw.text((0, 38), network('wlan0'), font=font2, fill="white")
+                draw.text((0, 50), temperature(), font=font2, fill="white")
             except KeyError:
                 # no wifi enabled/available
                 pass
