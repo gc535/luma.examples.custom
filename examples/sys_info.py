@@ -60,7 +60,7 @@ def cpu_usage():
     uptime = datetime.now() - datetime.fromtimestamp(psutil.boot_time())
     #av1, av2, av3 = os.getloadavg()
     use_percent = psutil.cpu_percent(interval=None)
-    return "Cpu: %.2f  Up: %s" \
+    return "Cpu:%.2f % Up: %s" \
         % (use_percent, str(uptime).split('.')[0])
 
 
